@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # file_path = "outputs/gpt-3.5-turbo/toxicity/test_critic_no-tool_1000_seed0.jsonl" # no tools
 
     ## text-davinci-003
-    file_path = "outputs/text-davinci-003/toxicity/test_critic_1000_seed0.jsonl"
+    file_path = "outputs/glm-4-flash/toxicity/test_1000_seed0_s0_e-1_08-03_01-41.jsonl"
     # file_path = "outputs/text-davinci-003/toxicity/test_critic_no-tool_1000_seed0.jsonl" # no tools
 
     evaluate(file_path, output=True)

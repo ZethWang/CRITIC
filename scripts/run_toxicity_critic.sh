@@ -9,7 +9,7 @@ MODEL="glm-4-flash"
 SPLIT="test"
 
 TEMPERATURE=0.9
-CRITIC_TYPE=critic
+CRITIC_TYPE="critic"
 USE_TOOL=true
 
 # CRITIC_TYPE=critic_v1_no-tool

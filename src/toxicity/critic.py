@@ -19,7 +19,7 @@ from src.toxicity.utils import *
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="toxicity", type=str)
-    parser.add_argument("--model", default="text-davinci-003", type=str)
+    parser.add_argument("--model", default="glm-4-flash", type=str)
     parser.add_argument("--critic_type", default="critic", type=str)
     parser.add_argument("--split", default="test", type=str)
     parser.add_argument("--num_test_sample", default=1000, type=int, help="-1 for full data")
@@ -29,8 +29,8 @@ def parse_args():
     parser.add_argument("--end", default=-1, type=int)
     parser.add_argument("--max_iter", default=4, type=int)
     parser.add_argument("--temperature", default=0.9, type=float)
-    parser.add_argument("--num_sampling", default=25)
-    parser.add_argument("--use_tool", type=strtobool, default=True)
+    parser.add_argument("--num_sampling", default=25,type=int)
+    parser.add_argument("--use_tool", default=True,type=bool)
     parser.add_argument("--stop_toxicity", default=0.1, type=float)
     args = parser.parse_args()
     return args
@@ -124,7 +124,7 @@ def critic(args):
                     )
                     if not result: # skip content filter error
                         break
-                    generated_critique = result['choices'][0]['text'].strip()
+                    generated_critique = result.choices[0].content.strip()
                     if "no" in generated_critique: # stop criteria (w/o Tool)
                         info = f"Toxicity is satisfied: {generated_critique}"
                         pred.append({"info": info})

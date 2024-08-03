@@ -7,7 +7,7 @@ _ =load_dotenv(find_dotenv())
 
 
 ## Perspective API
-PERSPECTIVE_API_KEY = os.getenv['PERSPECTIVE_API_KEY']
+PERSPECTIVE_API_KEY = os.getenv('PERSPECTIVE_API_KEY')
 
 PERSPECTIVE_API_ATTRIBUTES = (
     'TOXICITY',

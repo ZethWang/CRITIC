@@ -5,11 +5,11 @@ DATA="toxicity"
 # MODEL="text-davinci-003"
 # MODEL="gpt-3.5-turbo"
 MODEL="glm-4-flash"
-
+START=0
 SPLIT="test"
 NUM_SAMPLING=3
 TEMPERATURE=0.9
-CRITIC_TYPE=critic
+CRITIC_TYPE="critic"
 USE_TOOL=true
 
 # CRITIC_TYPE=critic_v1_no-tool
@@ -34,7 +34,7 @@ cmd="${RUN_CMD} src/toxicity/critic.py \
     --start $START \
     --end $END \
     --temperature $TEMPERATURE \
-    --num_samplings $NUM_SAMPLINGS"
+    --num_sampling $NUM_SAMPLING"
 
 echo "cmd: $cmd"
 
