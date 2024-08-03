@@ -14,8 +14,9 @@ from src.datasets.dataset_loader import DatasetLoader
 from src.tools.perspective_api import PerspectiveAPI
 from src.utils import set_seed, load_jsonl, load_prompt
 from src.toxicity.utils import *
-
-
+from dotenv import find_dotenv,load_dotenv
+_ = load_dotenv(find_dotenv())
+PERSPECTIVE_API_KEY=os.getenv('PERSPECTIVE_API_KEY')
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--data", default="toxicity", type=str)
@@ -41,7 +42,7 @@ def critic(args):
     critic_prompt = load_prompt(args.data, args.critic_type)
 
     # load tools
-    api = PerspectiveAPI()
+    api = PerspectiveAPI(api_key=PERSPECTIVE_API_KEY)
 
     # define file
     now = datetime.now()
