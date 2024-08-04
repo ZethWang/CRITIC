@@ -1141,3 +1141,139 @@ $cmd
    - 确保 `CUDA_VISIBLE_DEVICES` 设置正确。如果没有 GPU 或者 GPU 编号错误，会导致程序无法找到合适的 GPU。
 
 通过以上解释，相信你已经能够理解这段脚本的每个部分。如果你有进一步的问题或需要更具体的帮助，请随时告诉我！
+
+
+---
+
+
+要理解代码中 `use_tool=True` 和 `use_tool=False` 的区别，我们需要逐步解析这段代码，明确它们各自的处理逻辑和目的。以下是这段代码的详细中文解释：
+
+### 代码片段
+
+```python
+if args.use_tool:
+    toxic_critique = f"{most_toxic_score:.0%} toxicity of {most_toxic_attr}"
+    if toxicity_scores['toxicity'] < args.stop_toxicity: # stop criteria (oracle)
+        info = f"Toxicity score is satisfied: {toxicity_scores['toxicity']:.4f}"
+        pred.append({"info": info})
+        print(info)
+        break
+else: # not use tool
+    result = llm(
+        model=args.model,
+        prompt=critic_prompt + context,
+        max_tokens=args.max_tokens,
+        temperature=args.temperature,
+        n=1,
+        stop=['.', '---'],
+    )
+    if not result: # skip content filter error
+        break
+    generated_critique = result.choices[0].content.strip()
+    if "no" in generated_critique: # stop criteria (w/o Tool)
+        info = f"Toxicity is satisfied: {generated_critique}"
+        pred.append({"info": info})
+        print(info)
+        break
+
+# few-shot prompt
+if args.use_tool:
+    context += f"{toxic_critique}. "
+else:
+    context += f"{generated_critique}. "
+context += """To improve content safety while ensuring fluency, here's a different non-toxic continuation after '\\':\n\n"""
+context += f"{prompt}\\\n"
+```
+
+### 步骤解析
+
+#### 1. 使用工具（`use_tool=True`）
+
+- **`toxic_critique` 生成**：
+  ```python
+  toxic_critique = f"{most_toxic_score:.0%} toxicity of {most_toxic_attr}"
+  ```
+  - **解释**：这行代码生成一个字符串，描述当前文本中毒性最高的属性及其毒性百分比。例如，如果最高毒性是“侮辱性”（insult），其分数为 0.45（即 45%），那么生成的字符串为 "45% toxicity of insult"。
+
+- **检查毒性是否低于阈值**：
+  ```python
+  if toxicity_scores['toxicity'] < args.stop_toxicity:
+      info = f"Toxicity score is satisfied: {toxicity_scores['toxicity']:.4f}"
+      pred.append({"info": info})
+      print(info)
+      break
+  ```
+  - **解释**：检查文本的整体毒性评分是否低于预设的阈值 `args.stop_toxicity`。如果低于这个阈值，表示文本已经足够安全，可以停止进一步处理。
+  - **操作**：如果条件满足，则打印信息并退出当前循环，将信息保存到 `pred` 列表中，以便记录此次处理结果。
+
+#### 2. 不使用工具（`use_tool=False`）
+
+- **调用语言模型生成评论**：
+  ```python
+  result = llm(
+      model=args.model,
+      prompt=critic_prompt + context,
+      max_tokens=args.max_tokens,
+      temperature=args.temperature,
+      n=1,
+      stop=['.', '---'],
+  )
+  ```
+  - **解释**：调用语言模型 `llm`，使用模型 `args.model` 和当前上下文生成对文本的评论或反馈。`prompt` 是一个综合了先前信息的上下文，用于指导模型生成。
+  - **参数细节**：
+    - **`max_tokens=args.max_tokens`**：限制生成文本的最大长度。
+    - **`temperature=args.temperature`**：控制生成文本的随机性，较高的温度会导致更随机的输出。
+    - **`n=1`**：请求模型生成一个输出。
+    - **`stop=['.', '---']`**：定义生成结束的标记。
+
+- **检查生成结果**：
+  ```python
+  if not result:
+      break
+  generated_critique = result.choices[0].content.strip()
+  if "no" in generated_critique:
+      info = f"Toxicity is satisfied: {generated_critique}"
+      pred.append({"info": info})
+      print(info)
+      break
+  ```
+  - **解释**：如果模型返回空结果（可能由于内容过滤问题），则跳过当前循环。
+  - **生成的评论**：提取模型返回的文本，去除空白部分得到 `generated_critique`。
+  - **检查内容**：如果生成的评论中包含“no”这个词，说明模型认为文本已经安全，不需要进一步改进。
+
+#### 3. 构建新上下文（无论 `use_tool` 状态）
+
+- **更新上下文信息**：
+  ```python
+  if args.use_tool:
+      context += f"{toxic_critique}. "
+  else:
+      context += f"{generated_critique}. "
+  context += """To improve content safety while ensuring fluency, here's a different non-toxic continuation after '\\':\n\n"""
+  context += f"{prompt}\\\n"
+  ```
+  - **解释**：
+    - **加入毒性信息**：根据 `use_tool` 的状态，添加 `toxic_critique` 或 `generated_critique` 到上下文 `context` 中。
+    - **生成提示**：提供一个明确的提示，告诉模型要生成一个无毒的文本续写。
+    - **添加原始提示**：将当前的 `prompt` 加入到上下文中，为下一步生成做准备。
+
+### 综述
+
+#### 使用工具（`use_tool=True`）
+
+- **方法**：利用 Perspective API 提供的毒性评分进行判断，生成特定毒性属性的字符串，并用作指导生成的新文本的提示。
+- **优点**：依赖于专门的工具提供精确的毒性评估，能够高效地识别出需要改善的部分。
+- **终止条件**：文本整体毒性低于 `args.stop_toxicity` 时停止。
+
+#### 不使用工具（`use_tool=False`）
+
+- **方法**：依赖于语言模型生成对文本的评估和建议，判断文本的安全性。
+- **优点**：不依赖外部工具，灵活性高，在没有 API 的环境下也能执行。
+- **终止条件**：模型生成的评论中包含指示性信息（如“不需要改进”）时停止。
+
+### 总结
+
+- **工具模式**：侧重于使用专门工具的精确毒性评分和评估进行判断，并基于这些信息指导生成新的安全文本。
+- **非工具模式**：依赖语言模型提供的分析和建议，灵活判断文本是否需要进一步改进。
+
+通过理解这两种模式的差异，我们可以更好地根据实际需求选择合适的文本处理方法。

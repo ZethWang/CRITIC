@@ -32,7 +32,7 @@ def parse_args():
     parser.add_argument("--temperature", default=0.9, type=float)
     parser.add_argument("--num_sampling", default=25,type=int)
     parser.add_argument("--use_tool", default=True,type=bool)
-    parser.add_argument("--stop_toxicity", default=0.1, type=float)
+    parser.add_argument("--stop_toxicity", default=0.001, type=float)
     args = parser.parse_args()
     return args
 
@@ -53,13 +53,12 @@ def critic(args):
     # load dataset
     dataset = []
     for sample in load_jsonl(init_file):
-        if len(dataset)>2:
-            break
         dataset.append(sample)
 
     print('number of samples: ', len(dataset))
 
     writer = open(out_file, 'w')
+    
 
     for idx, sample in enumerate(dataset):
         # set start and end
@@ -160,38 +159,40 @@ def critic(args):
                         break
                     
                     #######################################
-                    prediction = result['choices'][0]
-                    if len(prediction['text']) > 3: # ensure continuation length
+                    prediction = result.choices[0]
+                    if len(prediction.message.content) > 3: # ensure continuation length
                         break
 
                 if not result:
                     break # break iteration
 
-                print(f"{prediction['text']}")
-
+                try:
+                    print(f"{prediction.message.content}")
+                except:
+                    print("error prediction format")
                 # delete keys in log_probs: top_logprobs, tokens, text_offset
                 try:
                     del prediction['logprobs']['top_logprobs']
                     del prediction['logprobs']['tokens']
                     del prediction['logprobs']['text_offset']
                 except:
-                    print(">> Missing keys:", prediction['logprobs'])
+                    print(">> Missing keys:logprobs", )
 
-                prediction['toxicity'] = api.request_format(prediction['text'])[0]
+                toxicity = api.request_format(prediction.message.content)[0]
 
-                if not prediction['toxicity']:
+                if not toxicity:
                     print(">> Perspective API error")
                     break
                     
-                is_reduced = prediction['toxicity']['toxicity'] < toxicity_scores['toxicity']
+                is_reduced = toxicity['toxicity'] < toxicity_scores['toxicity']
 
-                print(f"New toxicity: {prediction['toxicity']['toxicity']:.3f}")
+                print(f"New toxicity: {toxicity['toxicity']:.3f}")
                 print(f"Is reduced: {is_reduced}")
 
                 if args.use_tool and not is_reduced:
                     pred.append(pred[itr - 1])
                 else:
-                    pred.append(prediction)
+                    pred.append(toxicity)
 
             sample['prediction'][i] = pred
 

@@ -87,8 +87,9 @@ def inference(args):
         for choice in choices:
             if choice.logprobs is not None:
                 choice.logprobs = {k: choice.logprobs.k for k in choice.logprobs if k in ['token_logprobs']}
+        # 将 choice.message.content 放入字典，并添加到 sample['prediction'] 列表中
+        sample['prediction'] = [{'text': choice.message.content.strip()} for choice in choices]
 
-        sample['prediction'] = choices[0].message.content 
         writer.write(json.dumps(sample) + '\n')
         writer.flush()
 
