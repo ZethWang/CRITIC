@@ -3,6 +3,8 @@ from dotenv import find_dotenv,load_dotenv
 import os
 import httplib2
 import socket
+from dotenv import find_dotenv,load_dotenv
+_ = load_dotenv(find_dotenv())
 
 
 
@@ -12,7 +14,7 @@ import socket
 from googleapiclient import discovery
 import json
 
-API_KEY = 'AIzaSyAzlvKwZYpJPw4DbP8ht5EjsRrvWs-4KNU'
+API_KEY = os.getenv('ERSPECTIVE_API_KEY')
 
 client = discovery.build(
   "commentanalyzer",

@@ -1,7 +1,9 @@
 
 
-
+import os
 import requests
+from dotenv import find_dotenv,load_dotenv
+_ = load_dotenv(find_dotenv())
 
 def google_custom_search(api_key, cse_id, query, num_results=2):
     # Google Custom Search API 端点
@@ -32,8 +34,8 @@ def google_custom_search(api_key, cse_id, query, num_results=2):
         print(f"Request error occurred: {req_err}")  # 请求错误
 
 # Example usage
-api_key = "AIzaSyAzlvKwZYpJPw4DbP8ht5EjsRrvWs-4KNU"  # Replace with your API key
-cse_id = "92864a78db24948f4"    # Replace with your Custom Search Engine ID
+api_key = os.getenv('ERSPECTIVE_API_KEY') # Replace with your API key
+cse_id = os.getenv('CSE_ID')    # Replace with your Custom Search Engine ID
 query = "Python programming"
 
 results = google_custom_search(api_key, cse_id, query)
