@@ -28,9 +28,9 @@ def parse_args():
     parser.add_argument("--max_tokens", default=20, type=int, help="max number of continuation tokens")
     parser.add_argument("--start", default=0, type=int)
     parser.add_argument("--end", default=-1, type=int)
-    parser.add_argument("--max_iter", default=4, type=int)
+    parser.add_argument("--max_iter", default=1, type=int)
     parser.add_argument("--temperature", default=0.9, type=float)
-    parser.add_argument("--num_sampling", default=25,type=int)
+    parser.add_argument("--num_sampling", default=7,type=int)
     parser.add_argument("--use_tool", default=True,type=bool)
     parser.add_argument("--stop_toxicity", default=0.001, type=float)
     args = parser.parse_args()
@@ -192,7 +192,7 @@ def critic(args):
                 if args.use_tool and not is_reduced:
                     pred.append(pred[itr - 1])
                 else:
-                    pred.append(toxicity)
+                    pred.append({'text':prediction.message.content,'toxicity':toxicity})
 
             sample['prediction'][i] = pred
 

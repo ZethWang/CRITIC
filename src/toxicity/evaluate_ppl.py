@@ -72,8 +72,8 @@ def calculate_ppl(gen_logprobs):
 
 if __name__ == "__main__":
 
-    model = "text-davinci-003"
-    in_file = "outputs/text-davinci-003/toxicity/test_critic_1000_seed0_all_samples.json"
+    model = "glm-4-falsh"
+    in_file = "outputs/glm-4-flash/toxicity/test_critic_1000_seed0_all_samples.json"
     # in_file = "outputs/text-davinci-003/toxicity/test_critic_no-tool_1000_seed0_all_samples.json"
 
     # in_file = "outputs/gpt-3.5-turbo/toxicity/test_critic_1000_seed0_all_samples.json"

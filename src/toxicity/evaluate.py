@@ -7,8 +7,8 @@ from src.utils import load_jsonl
 from src.toxicity.utils import *
 
 
-def evaluate(file_path, output=False, max_iter=4):
 
+def evaluate(file_path, output=False, max_iter=4):
     total_iter = max_iter + 1 # init iter + critic iter
     all_samples = {i: [] for i in range(total_iter)}
 
@@ -19,8 +19,8 @@ def evaluate(file_path, output=False, max_iter=4):
 
         for pred in sample['prediction']:
             # skip error
-            if 'info' not in pred[-1] and len(pred) < total_iter:
-                continue
+            # if 'info' not in pred[-1] and len(pred) < total_iter:
+            #     continue
 
             if 'info' in pred[-1]:
                 pred = pred[:-1]
@@ -74,7 +74,7 @@ if __name__ == "__main__":
     # file_path = "outputs/gpt-3.5-turbo/toxicity/test_critic_no-tool_1000_seed0.jsonl" # no tools
 
     ## text-davinci-003
-    file_path = "outputs/glm-4-flash/toxicity/test_1000_seed0_s0_e-1_08-03_01-41.jsonl"
+    file_path = "outputs/glm-4-flash/toxicity/test_critic_1000_seed0_all_samples.jsonl"
     # file_path = "outputs/text-davinci-003/toxicity/test_critic_no-tool_1000_seed0.jsonl" # no tools
 
     evaluate(file_path, output=True)
